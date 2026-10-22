@@ -550,8 +550,7 @@
       });
     });
 
-    // 供 app.js 在登入、選擇群組後切換手機畫面
-    window.meetNestUI.setMobileView = setMobileView;
+    // 手機畫面切換方法會在下方一併提供給 app.js。
 
     // 舊版表單提示保留作後備。
     // app.js 會在事件捕捉階段處理實際的建立群組流程。
@@ -581,9 +580,12 @@
 
     // 提供 app.js 呼叫的介面方法
     window.meetNestUI = {
+      setMobileView,
+
       showDashboard(user) {
         $("welcome-section").hidden = true;
         $("app-shell").hidden = false;
+        setMobileView("groups");
 
         $("user-display-name").textContent =
           user?.displayName || "MeetNest 成員";
