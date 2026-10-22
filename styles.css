@@ -977,3 +977,59 @@ button:disabled {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* MeetNest calendar feature */
+.calendar-day-blank {
+  pointer-events: none;
+  background: transparent;
+}
+.calendar-day-number {
+  display: block;
+  line-height: 1.4;
+  font-weight: 750;
+}
+.calendar-day.today .calendar-day-number {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.calendar-day.selected {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+.calendar-day .day-dots {
+  min-height: 7px;
+}
+.status-choice.active {
+  border-color: var(--blue);
+  background: var(--blue-light);
+  box-shadow: inset 0 0 0 1px var(--blue);
+}
+.status-choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+@media (max-width: 719px) {
+  .calendar-grid {
+    gap: 2px;
+    padding: 6px;
+  }
+  .calendar-day {
+    min-height: 48px;
+    padding: 4px 0;
+    gap: 4px;
+    font-size: 12px;
+  }
+  .calendar-weekday {
+    padding: 5px 0;
+  }
+  .day-dots {
+    gap: 2px;
+  }
+  .day-dots .status-dot {
+    width: 5px;
+    height: 5px;
+    flex-basis: 5px;
+  }
+}
