@@ -17,7 +17,11 @@ import {
   doc,
   getDocs,
   writeBatch,
-  serverTimestamp
+  serverTimestamp,
+  setDoc,
+  deleteDoc,
+  query,
+  where
 } from
   "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
@@ -42,6 +46,28 @@ let isCreatingGroup = false;
 let currentUser = null;
 let activeGroupId = null;
 let groups = [];
+let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let selectedDateKey = dateKeyFromDate(new Date());
+let monthAvailability = [];
+let availabilityLoading = false;
+let savingAvailability = false;
+const monthCache = new Map();
+
+function dateKeyFromDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function monthKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function dateFromKey(key) {
+  const [year, month, day] = key.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
 
 // ========================================
 // 2. 登入提示及按鈕
@@ -255,13 +281,11 @@ function selectGroup(groupId) {
 
   renderGroups();
 
-  // 此階段尚未載入日曆、活動及成員詳細資料。
-  $("calendar-month-label").textContent = "日曆功能待開發";
-  $("selected-date-label").textContent = "下一階段將加入日期選擇";
-  $("best-date-result").textContent = "加入成員日程後，便可推薦最佳日期。";
-
+  $("best-date-result").textContent = "目前顯示群組成員已填寫的日期狀態；最佳日期推薦將在下一階段加入。";
   const inviteButton = $("invite-button");
   if (inviteButton) inviteButton.disabled = false;
+  renderCalendar();
+  loadMonthAvailability();
 }
 
 function renderNoGroupSelected() {
@@ -272,10 +296,206 @@ function renderNoGroupSelected() {
   $("calendar-month-label").textContent = "尚未選擇群組";
   $("selected-date-label").textContent = "尚未選擇日期";
   $("best-date-result").textContent = "建立群組後，這裡會顯示推薦日期。";
+  monthAvailability = [];
+  renderCalendar();
+  updateStatusButtons();
 }
 
 // ========================================
-// 7. 建立私人群組
+// 7. 日曆與群組成員有空狀態
+// Firestore 路徑：groups/{groupId}/availability/{uid_YYYY-MM-DD}
+// 每次切換月份只讀取該月份的狀態；點擊狀態時才寫入。
+// ========================================
+
+const weekdayLabels = ["日", "一", "二", "三", "四", "五", "六"];
+const statusLabels = { free: "有空", maybe: "待定", busy: "沒空" };
+
+function renderCalendar() {
+  const grid = $("calendar-grid");
+  const monthLabel = $("calendar-month-label");
+  if (!grid || !monthLabel) return;
+
+  monthLabel.textContent = new Intl.DateTimeFormat("zh-HK", {
+    year: "numeric", month: "long"
+  }).format(calendarMonth);
+
+  grid.replaceChildren();
+  weekdayLabels.forEach((label) => {
+    const weekday = document.createElement("div");
+    weekday.className = "calendar-weekday";
+    weekday.textContent = label;
+    grid.append(weekday);
+  });
+
+  const firstWeekday = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1).getDay();
+  const daysInMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
+  for (let i = 0; i < firstWeekday; i += 1) {
+    const blank = document.createElement("div");
+    blank.className = "calendar-day calendar-day-blank";
+    blank.setAttribute("aria-hidden", "true");
+    grid.append(blank);
+  }
+
+  const todayKey = dateKeyFromDate(new Date());
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const date = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
+    const key = dateKeyFromDate(date);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "calendar-day";
+    button.dataset.date = key;
+    if (key === selectedDateKey) button.classList.add("selected");
+    if (key === todayKey) button.classList.add("today");
+    const number = document.createElement("span");
+    number.className = "calendar-day-number";
+    number.textContent = String(day);
+    button.append(number);
+
+    const dots = document.createElement("span");
+    dots.className = "day-dots";
+    const dayEntries = monthAvailability.filter((entry) => entry.dateKey === key);
+    ["free", "maybe", "busy"].forEach((status) => {
+      if (dayEntries.some((entry) => entry.status === status)) {
+        const dot = document.createElement("i");
+        dot.className = `status-dot ${status === "free" ? "available" : status === "maybe" ? "maybe" : "busy"}`;
+        dot.title = statusLabels[status];
+        dots.append(dot);
+      }
+    });
+    button.append(dots);
+    button.addEventListener("click", () => {
+      selectedDateKey = key;
+      renderCalendar();
+      updateStatusButtons();
+    });
+    grid.append(button);
+  }
+
+  const selectedDate = dateFromKey(selectedDateKey);
+  $("selected-date-label").textContent = new Intl.DateTimeFormat("zh-HK", {
+    year: "numeric", month: "long", day: "numeric", weekday: "long"
+  }).format(selectedDate);
+  updateStatusButtons();
+}
+
+function updateStatusButtons() {
+  const hasGroup = Boolean(activeGroupId);
+  const ownEntry = monthAvailability.find((entry) =>
+    entry.dateKey === selectedDateKey && entry.uid === currentUser?.uid
+  );
+  document.querySelectorAll(".status-choice").forEach((button) => {
+    button.disabled = !hasGroup || availabilityLoading || savingAvailability;
+    button.classList.toggle("active", Boolean(ownEntry && ownEntry.status === button.dataset.status));
+    button.setAttribute("aria-pressed", String(Boolean(ownEntry && ownEntry.status === button.dataset.status)));
+  });
+}
+
+async function loadMonthAvailability(force = false) {
+  if (!currentUser || !activeGroupId) {
+    monthAvailability = [];
+    renderCalendar();
+    return;
+  }
+
+  const key = `${activeGroupId}:${monthKey(calendarMonth)}`;
+  if (!force && monthCache.has(key)) {
+    monthAvailability = monthCache.get(key);
+    renderCalendar();
+    return;
+  }
+
+  availabilityLoading = true;
+  updateStatusButtons();
+  const startDate = `${monthKey(calendarMonth)}-01`;
+  const endDate = dateKeyFromDate(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0));
+  try {
+    const availabilityRef = collection(db, "groups", activeGroupId, "availability");
+    const availabilityQuery = query(
+      availabilityRef,
+      where("dateKey", ">=", startDate),
+      where("dateKey", "<=", endDate)
+    );
+    const snapshot = await getDocs(availabilityQuery);
+    monthAvailability = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+    monthCache.set(key, monthAvailability);
+    renderCalendar();
+  } catch (error) {
+    console.error("Load calendar availability error:", error);
+    showToast(error.code === "permission-denied"
+      ? "日曆讀取被 Firestore Rules 拒絕，請先加入日曆資料的成員讀取規則。"
+      : "載入日曆狀態失敗，請稍後再試。");
+  } finally {
+    availabilityLoading = false;
+    updateStatusButtons();
+  }
+}
+
+async function saveAvailability(status) {
+  if (!currentUser || !activeGroupId || savingAvailability) return;
+  if (!selectedDateKey) {
+    showInfo("請先選擇日期", "在日曆上點選一個日期，再設定你的狀態。");
+    return;
+  }
+
+  savingAvailability = true;
+  updateStatusButtons();
+  const docId = `${currentUser.uid}_${selectedDateKey}`;
+  const entryRef = doc(db, "groups", activeGroupId, "availability", docId);
+  try {
+    if (status === "unset") {
+      await deleteDoc(entryRef);
+      monthAvailability = monthAvailability.filter((entry) => entry.id !== docId);
+    } else {
+      const entry = {
+        uid: currentUser.uid,
+        displayName: currentUser.displayName || currentUser.email || "MeetNest 成員",
+        dateKey: selectedDateKey,
+        status,
+        updatedAt: serverTimestamp()
+      };
+      await setDoc(entryRef, entry);
+      const localEntry = { ...entry, id: docId, updatedAt: new Date() };
+      const index = monthAvailability.findIndex((item) => item.id === docId);
+      if (index >= 0) monthAvailability[index] = localEntry;
+      else monthAvailability.push(localEntry);
+    }
+    monthCache.set(`${activeGroupId}:${monthKey(calendarMonth)}`, monthAvailability);
+    renderCalendar();
+    showToast(status === "unset" ? "已清除這天的狀態。" : `已儲存「${statusLabels[status]}」狀態。`);
+  } catch (error) {
+    console.error("Save availability error:", error);
+    showInfo(
+      "未能儲存狀態",
+      error.code === "permission-denied"
+        ? "Firestore Rules 尚未允許群組成員儲存日曆狀態。請先更新規則，再重試。"
+        : `儲存失敗：${error.message || "請稍後再試。"}`
+    );
+  } finally {
+    savingAvailability = false;
+    updateStatusButtons();
+  }
+}
+
+$("previous-month")?.addEventListener("click", () => {
+  calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
+  selectedDateKey = dateKeyFromDate(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1));
+  renderCalendar();
+  loadMonthAvailability();
+});
+
+$("next-month")?.addEventListener("click", () => {
+  calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1);
+  selectedDateKey = dateKeyFromDate(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1));
+  renderCalendar();
+  loadMonthAvailability();
+});
+
+document.querySelectorAll(".status-choice").forEach((button) => {
+  button.addEventListener("click", () => saveAvailability(button.dataset.status));
+});
+
+// ========================================
+// 8. 建立私人群組
 // 三份資料使用同一個 writeBatch 原子寫入
 // ========================================
 
@@ -477,6 +697,8 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) {
     groups = [];
     activeGroupId = null;
+    monthAvailability = [];
+    monthCache.clear();
 
     window.meetNestUI?.showLanding();
     setLoginButton(false);
