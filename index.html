@@ -12,6 +12,7 @@
 </head>
 
 <body>
+  <!-- 頂部品牌列 -->
   <header class="topbar">
     <a class="brand" href="./" aria-label="MeetNest 首頁">
       <span class="brand-icon">M</span>
@@ -24,7 +25,9 @@
   <main id="welcome-section" class="landing">
     <section class="hero">
       <span class="eyebrow">PLAN SOMETHING TOGETHER</span>
+
       <h1>約個時間，<br>讓相聚變得簡單。</h1>
+
       <p class="hero-description">
         建立私人群組，看看大家哪天有空，<br class="desktop-break">
         一起找出最適合見面的日子。
@@ -40,6 +43,7 @@
         <span class="google-mark" aria-hidden="true">G</span>
         使用 Google 登入
       </button>
+
       <p id="app-message" class="message" role="status" aria-live="polite">
         登入後即可建立自己的私人群組。
       </p>
@@ -61,6 +65,7 @@
           <p>與朋友、家人或同事建立不同群組。</p>
         </div>
       </div>
+
       <div class="feature-row">
         <span class="feature-icon green-icon">02</span>
         <div>
@@ -68,6 +73,7 @@
           <p>保留熟悉的紅、黃、綠三色狀態。</p>
         </div>
       </div>
+
       <div class="feature-row">
         <span class="feature-icon gold-icon">03</span>
         <div>
@@ -80,6 +86,8 @@
 
   <!-- 登入後的主介面 -->
   <div id="app-shell" class="app-shell" hidden>
+
+    <!-- 桌面版側邊欄 -->
     <aside class="sidebar">
       <div class="sidebar-title">
         <span class="eyebrow">WORKSPACE</span>
@@ -109,29 +117,53 @@
             <small id="user-email">已登入</small>
           </div>
         </div>
-        <button id="sign-out-button" class="text-button" type="button">登出</button>
+
+        <button id="sign-out-button" class="text-button" type="button">
+          登出
+        </button>
       </div>
     </aside>
 
+    <!-- 主工作區 -->
     <main class="workspace">
+
       <header class="workspace-header">
         <div class="workspace-title">
           <span class="eyebrow">PRIVATE GROUP</span>
           <h1 id="active-group-name">選擇一個群組</h1>
-          <p id="active-group-description">建立群組，或加入朋友的私人群組。</p>
+          <p id="active-group-description">
+            建立群組，或加入朋友的私人群組。
+          </p>
         </div>
+
         <button id="invite-button" class="secondary-button" type="button">
           邀請成員
         </button>
       </header>
 
+      <!-- 手機版專用建立群組按鈕 -->
+      <button
+        id="mobile-create-group-button"
+        class="primary-button full-width mobile-create-group"
+        type="button"
+      >
+        ＋ 建立群組
+      </button>
+
+      <!-- 群組功能切換 -->
       <nav class="workspace-tabs" aria-label="群組功能">
-        <button class="tab-button active" data-tab="calendar" type="button">約時間</button>
-        <button class="tab-button" data-tab="events" type="button">活動</button>
-        <button class="tab-button" data-tab="members" type="button">成員</button>
+        <button class="tab-button active" data-tab="calendar" type="button">
+          約時間
+        </button>
+        <button class="tab-button" data-tab="events" type="button">
+          活動
+        </button>
+        <button class="tab-button" data-tab="members" type="button">
+          成員
+        </button>
       </nav>
 
-      <!-- 日曆 -->
+      <!-- 日曆及約時間 -->
       <section id="calendar-panel" class="panel">
         <div class="panel-heading">
           <div>
@@ -148,9 +180,13 @@
         </div>
 
         <div class="calendar-toolbar">
-          <button id="previous-month" class="icon-button" type="button" aria-label="上個月">‹</button>
-          <h3 id="calendar-month-label">載入日曆中</h3>
-          <button id="next-month" class="icon-button" type="button" aria-label="下個月">›</button>
+          <button id="previous-month" class="icon-button" type="button" aria-label="上個月">
+            ‹
+          </button>
+          <h3 id="calendar-month-label">尚未選擇群組</h3>
+          <button id="next-month" class="icon-button" type="button" aria-label="下個月">
+            ›
+          </button>
         </div>
 
         <div id="calendar-grid" class="calendar-grid">
@@ -162,6 +198,7 @@
             <h3 id="selected-date-label">尚未選擇日期</h3>
             <p>設定你當天的狀態</p>
           </div>
+
           <div class="status-buttons">
             <button class="status-choice" data-status="free" type="button">
               <i class="status-dot available"></i>有空
@@ -172,14 +209,18 @@
             <button class="status-choice" data-status="busy" type="button">
               <i class="status-dot busy"></i>沒空
             </button>
-            <button class="status-choice" data-status="unset" type="button">清除</button>
+            <button class="status-choice" data-status="unset" type="button">
+              清除
+            </button>
           </div>
         </section>
 
         <section class="recommendation-card">
           <span class="eyebrow">BEST MATCH</span>
           <h2>最佳約會日期</h2>
-          <p id="best-date-result">提供成員日程後，這裡會顯示推薦日期。</p>
+          <p id="best-date-result">
+            提供成員日程後，這裡會顯示推薦日期。
+          </p>
         </section>
       </section>
 
@@ -190,10 +231,12 @@
             <h2>群組活動</h2>
             <p>集中查看已確認及待定的活動。</p>
           </div>
+
           <button id="create-event-button" class="primary-button" type="button">
             ＋ 新增活動
           </button>
         </div>
+
         <div id="event-list" class="event-list">
           <p class="empty-state">尚未載入活動。</p>
         </div>
@@ -207,6 +250,7 @@
             <p>查看成員及群組角色。</p>
           </div>
         </div>
+
         <div id="member-list" class="member-list">
           <p class="empty-state">尚未載入成員。</p>
         </div>
@@ -215,93 +259,155 @@
       <!-- 手機版底部導覽 -->
       <nav class="mobile-nav" aria-label="主要導覽">
         <button class="mobile-nav-button active" data-view="groups" type="button">
-          <span aria-hidden="true">▦</span><small>群組</small>
+          <span aria-hidden="true">▦</span>
+          <small>群組</small>
         </button>
+
         <button class="mobile-nav-button" data-view="calendar" type="button">
-          <span aria-hidden="true">▤</span><small>日曆</small>
+          <span aria-hidden="true">▤</span>
+          <small>日曆</small>
         </button>
+
         <button class="mobile-nav-button" data-view="events" type="button">
-          <span aria-hidden="true">◇</span><small>活動</small>
+          <span aria-hidden="true">◇</span>
+          <small>活動</small>
         </button>
+
         <button class="mobile-nav-button" data-view="profile" type="button">
-          <span aria-hidden="true">○</span><small>我的</small>
+          <span aria-hidden="true">○</span>
+          <small>我的</small>
         </button>
       </nav>
     </main>
   </div>
 
-  <!-- 建立群組 -->
+  <!-- 建立群組視窗 -->
   <dialog id="create-group-dialog" class="app-dialog">
     <form id="create-group-form">
       <div class="dialog-heading">
         <h2>建立私人群組</h2>
-        <button class="icon-button close-dialog" type="button" aria-label="關閉">×</button>
+        <button class="icon-button close-dialog" type="button" aria-label="關閉">
+          ×
+        </button>
       </div>
+
       <label for="group-name-input">群組名稱</label>
-      <input id="group-name-input" name="groupName" maxlength="60"
-        placeholder="例如：週末聚會團" required>
+      <input
+        id="group-name-input"
+        name="groupName"
+        maxlength="60"
+        placeholder="例如：週末聚會團"
+        required
+      >
+
       <label for="group-description-input">群組簡介（選填）</label>
-      <textarea id="group-description-input" name="description" rows="3"
-        maxlength="200" placeholder="這個群組用來安排甚麼活動？"></textarea>
+      <textarea
+        id="group-description-input"
+        name="description"
+        rows="3"
+        maxlength="200"
+        placeholder="這個群組用來安排甚麼活動？"
+      ></textarea>
+
       <p class="form-hint">群組預設為私人，只能透過邀請加入。</p>
+
       <div class="dialog-actions">
-        <button class="secondary-button close-dialog" type="button">取消</button>
-        <button class="primary-button" type="submit">建立群組</button>
+        <button class="secondary-button close-dialog" type="button">
+          取消
+        </button>
+        <button class="primary-button" type="submit">
+          建立群組
+        </button>
       </div>
     </form>
   </dialog>
 
-  <!-- 加入群組 -->
+  <!-- 加入群組視窗 -->
   <dialog id="join-group-dialog" class="app-dialog">
     <form id="join-group-form">
       <div class="dialog-heading">
         <h2>加入私人群組</h2>
-        <button class="icon-button close-dialog" type="button" aria-label="關閉">×</button>
+        <button class="icon-button close-dialog" type="button" aria-label="關閉">
+          ×
+        </button>
       </div>
+
       <label for="invite-link-input">邀請連結或邀請碼</label>
-      <input id="invite-link-input" name="inviteLink"
-        placeholder="貼上朋友分享的邀請連結" required>
+      <input
+        id="invite-link-input"
+        name="inviteLink"
+        placeholder="貼上朋友分享的邀請連結"
+        required
+      >
+
       <div class="dialog-actions">
-        <button class="secondary-button close-dialog" type="button">取消</button>
-        <button class="primary-button" type="submit">繼續</button>
+        <button class="secondary-button close-dialog" type="button">
+          取消
+        </button>
+        <button class="primary-button" type="submit">
+          繼續
+        </button>
       </div>
     </form>
   </dialog>
 
-  <!-- 新增活動 -->
+  <!-- 新增活動視窗 -->
   <dialog id="create-event-dialog" class="app-dialog">
     <form id="create-event-form">
       <div class="dialog-heading">
         <h2>新增活動</h2>
-        <button class="icon-button close-dialog" type="button" aria-label="關閉">×</button>
+        <button class="icon-button close-dialog" type="button" aria-label="關閉">
+          ×
+        </button>
       </div>
+
       <label for="event-title-input">活動名稱</label>
-      <input id="event-title-input" name="title" maxlength="100"
-        placeholder="例如：週末食飯" required>
+      <input
+        id="event-title-input"
+        name="title"
+        maxlength="100"
+        placeholder="例如：週末食飯"
+        required
+      >
+
       <label for="event-start-input">開始日期</label>
       <input id="event-start-input" name="startDate" type="date" required>
+
       <label for="event-end-input">結束日期（選填）</label>
       <input id="event-end-input" name="endDate" type="date">
+
       <label for="event-status-input">活動狀態</label>
       <select id="event-status-input" name="status">
         <option value="tentative">待定</option>
         <option value="confirmed">已確認</option>
       </select>
+
       <div class="dialog-actions">
-        <button class="secondary-button close-dialog" type="button">取消</button>
-        <button class="primary-button" type="submit">建立活動</button>
+        <button class="secondary-button close-dialog" type="button">
+          取消
+        </button>
+        <button class="primary-button" type="submit">
+          建立活動
+        </button>
       </div>
     </form>
   </dialog>
 
+  <!-- 共用提示視窗 -->
   <dialog id="info-dialog" class="app-dialog">
     <div class="dialog-heading">
       <h2 id="info-dialog-title">提示</h2>
-      <button class="icon-button close-dialog" type="button" aria-label="關閉">×</button>
+      <button class="icon-button close-dialog" type="button" aria-label="關閉">
+        ×
+      </button>
     </div>
+
     <p id="info-dialog-message"></p>
+
     <div class="dialog-actions">
-      <button class="primary-button close-dialog" type="button">知道了</button>
+      <button class="primary-button close-dialog" type="button">
+        知道了
+      </button>
     </div>
   </dialog>
 
@@ -311,50 +417,86 @@
     MeetNest · 讓每一次相聚，都更容易
   </footer>
 
+  <!-- 介面互動 -->
   <script>
     const $ = (id) => document.getElementById(id);
 
     function showInfo(title, message) {
       $("info-dialog-title").textContent = title;
       $("info-dialog-message").textContent = message;
-      $("info-dialog").showModal();
+
+      const dialog = $("info-dialog");
+      if (!dialog.open) dialog.showModal();
     }
 
-    document.querySelectorAll(".close-dialog").forEach(button => {
-      button.addEventListener("click", () => button.closest("dialog")?.close());
+    // 關閉所有對話框
+    document.querySelectorAll(".close-dialog").forEach((button) => {
+      button.addEventListener("click", () => {
+        button.closest("dialog")?.close();
+      });
     });
 
-    $("create-group-button").addEventListener("click", () => $("create-group-dialog").showModal());
-    $("join-group-button").addEventListener("click", () => $("join-group-dialog").showModal());
-    $("create-event-button").addEventListener("click", () => $("create-event-dialog").showModal());
+    // 桌面版建立群組
+    $("create-group-button").addEventListener("click", () => {
+      $("create-group-dialog").showModal();
+    });
 
-    $("invite-button").addEventListener("click", () =>
-      showInfo("邀請成員", "邀請連結功能將在下一階段接駁 Firebase。"));
+    // 手機版建立群組：使用相同的對話框
+    $("mobile-create-group-button").addEventListener("click", () => {
+      $("create-group-dialog").showModal();
+    });
 
-    document.querySelectorAll(".tab-button").forEach(button => {
+    // 加入群組
+    $("join-group-button").addEventListener("click", () => {
+      $("join-group-dialog").showModal();
+    });
+
+    // 新增活動
+    $("create-event-button").addEventListener("click", () => {
+      $("create-event-dialog").showModal();
+    });
+
+    // 邀請成員
+    $("invite-button").addEventListener("click", () => {
+      showInfo(
+        "邀請成員",
+        "私人邀請連結功能將在下一階段接駁 Firebase。"
+      );
+    });
+
+    // 群組功能分頁
+    document.querySelectorAll(".tab-button").forEach((button) => {
       button.addEventListener("click", () => {
         const tab = button.dataset.tab;
-        document.querySelectorAll(".tab-button").forEach(item => {
+
+        document.querySelectorAll(".tab-button").forEach((item) => {
           item.classList.toggle("active", item === button);
           item.setAttribute("aria-selected", String(item === button));
         });
+
         $("calendar-panel").hidden = tab !== "calendar";
         $("events-panel").hidden = tab !== "events";
         $("members-panel").hidden = tab !== "members";
       });
     });
 
-    document.querySelectorAll(".mobile-nav-button").forEach(button => {
+    // 手機版底部導覽
+    document.querySelectorAll(".mobile-nav-button").forEach((button) => {
       button.addEventListener("click", () => {
         const view = button.dataset.view;
-        document.querySelectorAll(".mobile-nav-button").forEach(item =>
-          item.classList.toggle("active", item === button));
+
+        document.querySelectorAll(".mobile-nav-button").forEach((item) => {
+          item.classList.toggle("active", item === button);
+        });
 
         if (view === "groups") {
           $("calendar-panel").hidden = false;
           $("events-panel").hidden = true;
           $("members-panel").hidden = true;
-          $("active-group-name").scrollIntoView({ behavior: "smooth", block: "start" });
+          $("active-group-name").scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
         } else if (view === "calendar") {
           $("calendar-panel").hidden = false;
           $("events-panel").hidden = true;
@@ -364,38 +506,73 @@
           $("events-panel").hidden = false;
           $("members-panel").hidden = true;
         } else {
-          showInfo("我的帳戶", "個人設定及登出功能將在下一階段接駁。");
+          showInfo(
+            "我的帳戶",
+            "你可以在左側帳戶區域查看資料及登出。"
+          );
         }
       });
     });
 
-    $("create-group-form").addEventListener("submit", event => {
+    // 舊版表單提示保留作後備。
+    // app.js 會在事件捕捉階段處理實際的建立群組流程。
+    $("create-group-form").addEventListener("submit", (event) => {
       event.preventDefault();
-      showInfo("尚未接駁資料庫", "群組建立功能尚未接駁 Firestore，資料並未儲存。");
+      showInfo(
+        "群組建立功能",
+        "請確認 app.js 已成功載入，再嘗試建立群組。"
+      );
     });
 
-    $("join-group-form").addEventListener("submit", event => {
+    $("join-group-form").addEventListener("submit", (event) => {
       event.preventDefault();
-      showInfo("尚未接駁邀請系統", "邀請連結驗證功能將在下一階段完成。");
+      showInfo(
+        "加入群組功能",
+        "私人邀請連結驗證功能將在下一階段完成。"
+      );
     });
 
-    $("create-event-form").addEventListener("submit", event => {
+    $("create-event-form").addEventListener("submit", (event) => {
       event.preventDefault();
-      showInfo("尚未接駁資料庫", "活動建立功能尚未接駁 Firestore，資料並未儲存。");
+      showInfo(
+        "活動功能",
+        "活動建立功能將在下一階段接駁 Firestore。"
+      );
     });
 
+    // 提供 app.js 呼叫的介面方法
     window.meetNestUI = {
       showDashboard(user) {
         $("welcome-section").hidden = true;
         $("app-shell").hidden = false;
-        $("user-display-name").textContent = user?.displayName || "MeetNest 成員";
+
+        $("user-display-name").textContent =
+          user?.displayName || "MeetNest 成員";
+
         $("user-email").textContent = user?.email || "已登入";
-        $("user-avatar").textContent = (user?.displayName || "M").slice(0, 1);
+
+        const avatar = $("user-avatar");
+        avatar.replaceChildren();
+
+        if (user?.photoURL) {
+          const image = document.createElement("img");
+          image.src = user.photoURL;
+          image.alt = "";
+          image.width = 38;
+          image.height = 38;
+          image.style.borderRadius = "50%";
+          image.style.objectFit = "cover";
+          avatar.append(image);
+        } else {
+          avatar.textContent = (user?.displayName || "M").slice(0, 1);
+        }
       },
+
       showLanding() {
         $("welcome-section").hidden = false;
         $("app-shell").hidden = true;
       },
+
       showInfo
     };
   </script>
