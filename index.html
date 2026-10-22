@@ -8,6 +8,20 @@
   <meta name="description" content="MeetNest — 一起找到大家有空的日子。">
   <title>MeetNest｜一起約時間</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* 手機群組選擇畫面；桌面版仍使用原有側邊欄 */
+    .mobile-group-panel { display: none; }
+    .mobile-group-panel[hidden] { display: none !important; }
+    .mobile-view-hidden { display: none !important; }
+    .mobile-group-heading { margin: 0 0 1rem; }
+    .mobile-group-heading h2 { margin: .35rem 0; }
+    .mobile-group-heading p { margin: .35rem 0 1rem; }
+    #mobile-join-group-button { margin-top: .6rem; }
+    #mobile-group-list { margin-top: 1rem; }
+    @media (max-width: 719px) {
+      .mobile-group-panel:not([hidden]) { display: block; }
+    }
+  </style>
   <script type="module" src="app.js"></script>
 </head>
 
@@ -141,14 +155,23 @@
         </button>
       </header>
 
-      <!-- 手機版專用建立群組按鈕 -->
-      <button
-        id="mobile-create-group-button"
-        class="primary-button full-width mobile-create-group"
-        type="button"
-      >
-        ＋ 建立群組
-      </button>
+      <!-- 手機版群組清單：與桌面側邊欄共用同一份群組資料 -->
+      <section id="mobile-group-panel" class="mobile-group-panel" hidden>
+        <div class="mobile-group-heading">
+          <span class="eyebrow">WORKSPACE</span>
+          <h2>我的群組</h2>
+          <p>選擇要安排時間的群組。</p>
+        </div>
+        <button id="mobile-create-group-button" class="primary-button full-width" type="button">
+          ＋ 建立群組
+        </button>
+        <button id="mobile-join-group-button" class="secondary-button full-width" type="button">
+          ＋ 加入邀請群組
+        </button>
+        <div id="mobile-group-list" class="group-list">
+          <p class="empty-state">正在載入群組…</p>
+        </div>
+      </section>
 
       <!-- 群組功能切換 -->
       <nav class="workspace-tabs" aria-label="群組功能">
@@ -446,8 +469,11 @@
       $("create-group-dialog").showModal();
     });
 
-    // 加入群組
+    // 加入群組（桌面及手機共用同一個視窗）
     $("join-group-button").addEventListener("click", () => {
+      $("join-group-dialog").showModal();
+    });
+    $("mobile-join-group-button").addEventListener("click", () => {
       $("join-group-dialog").showModal();
     });
 
@@ -480,39 +506,52 @@
       });
     });
 
-    // 手機版底部導覽
+    // 手機版底部導覽：群組清單與日曆是兩個不同畫面
+    function setMobileView(view) {
+      const isMobile = window.matchMedia("(max-width: 719px)").matches;
+      const groupPanel = $("mobile-group-panel");
+      const workspaceHeader = document.querySelector(".workspace-header");
+      const tabs = document.querySelector(".workspace-tabs");
+      const calendarPanel = $("calendar-panel");
+      const eventsPanel = $("events-panel");
+      const membersPanel = $("members-panel");
+
+      document.querySelectorAll(".mobile-nav-button").forEach((item) => {
+        item.classList.toggle("active", item.dataset.view === view);
+      });
+
+      if (!isMobile) {
+        groupPanel.hidden = true;
+        workspaceHeader?.classList.remove("mobile-view-hidden");
+        tabs?.classList.remove("mobile-view-hidden");
+        calendarPanel.hidden = false;
+        eventsPanel.hidden = true;
+        membersPanel.hidden = true;
+        return;
+      }
+
+      groupPanel.hidden = view !== "groups";
+      workspaceHeader?.classList.toggle("mobile-view-hidden", view === "groups" || view === "profile");
+      $("mobile-create-group-button")?.classList.toggle("mobile-view-hidden", view !== "groups");
+      tabs?.classList.toggle("mobile-view-hidden", view === "groups" || view === "profile");
+      calendarPanel.hidden = view !== "calendar";
+      eventsPanel.hidden = view !== "events";
+      membersPanel.hidden = true;
+
+      if (view === "profile") {
+        showInfo("我的帳戶", "你可以在帳戶視窗查看登入資料及登出。");
+      }
+    }
+
     document.querySelectorAll(".mobile-nav-button").forEach((button) => {
       button.addEventListener("click", () => {
         const view = button.dataset.view;
-
-        document.querySelectorAll(".mobile-nav-button").forEach((item) => {
-          item.classList.toggle("active", item === button);
-        });
-
-        if (view === "groups") {
-          $("calendar-panel").hidden = false;
-          $("events-panel").hidden = true;
-          $("members-panel").hidden = true;
-          $("active-group-name").scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-          });
-        } else if (view === "calendar") {
-          $("calendar-panel").hidden = false;
-          $("events-panel").hidden = true;
-          $("members-panel").hidden = true;
-        } else if (view === "events") {
-          $("calendar-panel").hidden = true;
-          $("events-panel").hidden = false;
-          $("members-panel").hidden = true;
-        } else {
-          showInfo(
-            "我的帳戶",
-            "你可以在左側帳戶區域查看資料及登出。"
-          );
-        }
+        setMobileView(view);
       });
     });
+
+    // 供 app.js 在登入、選擇群組後切換手機畫面
+    window.meetNestUI.setMobileView = setMobileView;
 
     // 舊版表單提示保留作後備。
     // app.js 會在事件捕捉階段處理實際的建立群組流程。
