@@ -153,7 +153,15 @@ async function loadGroups() {
 
     renderGroups();
 
-    if (activeGroupId && groups.some(g => g.id === activeGroupId)) {
+    const isMobile = window.matchMedia("(max-width: 719px)").matches;
+
+    if (isMobile) {
+      // 手機登入後先顯示群組清單，讓使用者自行選擇，不自動跳進第一個群組。
+      activeGroupId = null;
+      renderGroups();
+      renderNoGroupSelected();
+      window.meetNestUI?.setMobileView?.("groups");
+    } else if (activeGroupId && groups.some(g => g.id === activeGroupId)) {
       selectGroup(activeGroupId);
     } else if (groups.length > 0) {
       selectGroup(groups[0].id);
@@ -183,42 +191,51 @@ async function loadGroups() {
 // ========================================
 
 function renderGroups() {
-  const list = $("group-list");
-  if (!list) return;
+  const lists = [$("group-list"), $("mobile-group-list")].filter(Boolean);
+  if (lists.length === 0) return;
 
-  list.replaceChildren();
+  lists.forEach((list) => list.replaceChildren());
 
   if (groups.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "empty-state";
-    empty.textContent = "你還沒有群組，按上方按鈕建立第一個群組。";
-    list.append(empty);
+    lists.forEach((list) => {
+      const empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.textContent = "你還沒有群組，按上方按鈕建立第一個群組。";
+      list.append(empty);
+    });
     return;
   }
 
   groups.forEach((group) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className =
-      `group-item${group.id === activeGroupId ? " active" : ""}`;
+    lists.forEach((list) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className =
+        `group-item${group.id === activeGroupId ? " active" : ""}`;
 
-    const avatar = document.createElement("span");
-    avatar.className = "group-avatar";
-    avatar.textContent = (group.name || "群").slice(0, 1);
+      const avatar = document.createElement("span");
+      avatar.className = "group-avatar";
+      avatar.textContent = (group.name || "群").slice(0, 1);
 
-    const details = document.createElement("span");
-    details.style.minWidth = "0";
+      const details = document.createElement("span");
+      details.style.minWidth = "0";
 
-    const name = document.createElement("strong");
-    name.textContent = group.name || "未命名群組";
+      const name = document.createElement("strong");
+      name.textContent = group.name || "未命名群組";
 
-    const role = document.createElement("small");
-    role.textContent = group.role === "owner" ? "群主" : "群組成員";
+      const role = document.createElement("small");
+      role.textContent = group.role === "owner" ? "群主" : "群組成員";
 
-    details.append(name, role);
-    button.append(avatar, details);
-    button.addEventListener("click", () => selectGroup(group.id));
-    list.append(button);
+      details.append(name, role);
+      button.append(avatar, details);
+      button.addEventListener("click", () => {
+        selectGroup(group.id);
+        if (list.id === "mobile-group-list") {
+          window.meetNestUI?.setMobileView?.("calendar");
+        }
+      });
+      list.append(button);
+    });
   });
 }
 
@@ -364,6 +381,9 @@ document.addEventListener("submit", async (event) => {
 
     renderGroups();
     selectGroup(newGroup.id);
+    if (window.matchMedia("(max-width: 719px)").matches) {
+      window.meetNestUI?.setMobileView?.("calendar");
+    }
 
     form.reset();
     $("create-group-dialog")?.close();
